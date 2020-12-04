@@ -1,5 +1,6 @@
 package com.txhung.cv2app.core;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BlurMaskFilter;
@@ -9,9 +10,11 @@ import android.graphics.EmbossMaskFilter;
 import android.graphics.MaskFilter;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -24,16 +27,15 @@ import java.util.ArrayList;
 
 public class PainView extends View{
     public int BRUSH_SIZE = 10;
-    public static final int DEFAULT_COLOR = Color.RED;
+    public static final int DEFAULT_COLOR = Color.rgb(0,177,64);
     public static final int DEFAULT_BG_COLOR = Color.WHITE;
-
+    private Bitmap bitmapBackground;
     private  static final float TOUCH_TOLERANCE = 4;
     private float mX, mY;
     private Path mPath;
     private Paint mPaint;
-    private ArrayList<FingerPath> paths =new ArrayList<>();
+    private final ArrayList<FingerPath> paths =new ArrayList<>();
     private int currentColor;
-    private int backgroundColor = DEFAULT_BG_COLOR;
     private int strokeWidth;
     private boolean emboss;
     private boolean blur;
@@ -42,6 +44,8 @@ public class PainView extends View{
     private Bitmap mBitMap;
     private Canvas mCanvas;
     private final Paint mBitmapPaint = new Paint(Paint.DITHER_FLAG);
+    private int width;
+    private int height;
 
 
     public PainView(Context context) {
@@ -65,17 +69,18 @@ public class PainView extends View{
 
     }
 
-    public void  init(DisplayMetrics metrics){
-        int height = metrics.heightPixels;
-        int width = metrics.widthPixels;
-
+    public void  init(DisplayMetrics metrics, Bitmap bitmap){
+        height = metrics.heightPixels;
+        width = metrics.widthPixels;
+        bitmapBackground = bitmap;
         mBitMap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitMap);
-
+        Log.d("IMG WIDTH: ", Integer.toString(bitmapBackground.getWidth()));
         currentColor = DEFAULT_COLOR;
         strokeWidth = BRUSH_SIZE;
 
     }
+
     public void normal(){
         emboss = false;
         blur = false;
@@ -85,7 +90,6 @@ public class PainView extends View{
         blur = false;
     }
     public void clear(){
-        backgroundColor = DEFAULT_BG_COLOR;
         paths.clear();
         normal();
         invalidate();
@@ -96,7 +100,15 @@ public class PainView extends View{
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        mCanvas.drawColor(backgroundColor);
+    //    mCanvas.drawColor(backgroundColor);
+        int imgWidth = bitmapBackground.getWidth();
+        int imgHeight = bitmapBackground.getHeight();
+        float rate = width/imgWidth;
+        int dstHeight = Math.round(imgHeight*rate);
+        int dstWidth = Math.round(imgWidth/rate);
+        @SuppressLint("DrawAllocation") Rect rect = new Rect(0,0,width,dstHeight);
+
+        canvas.drawBitmap(bitmapBackground,0, 0, mBitmapPaint);
 
         for (FingerPath fp : paths){
             mPaint.setColor(fp.color);
@@ -112,17 +124,19 @@ public class PainView extends View{
 
         }
         canvas.drawBitmap(mBitMap,0,0, mBitmapPaint);
+        canvas.save();
         canvas.restore();
+
     }
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void touchStart(float x, float y){
         mPath = new Path();
-        FingerPath fp = new FingerPath(currentColor, emboss, blur, strokeWidth, (java.nio.file.Path) mPath);
+        FingerPath fp = new FingerPath(currentColor, emboss, blur, strokeWidth, mPath);
         paths.add(fp);
         mPath.reset();
         mPath.moveTo(x,y);
         mX = x;
         mY = y;
+        Log.d("DEbug TAG", "TouchStart: " + Float.toString(mY));
     }
     private void touchMove(float x, float y){
         float dx = Math.abs(x-mX);
@@ -132,32 +146,39 @@ public class PainView extends View{
             mX = x;
             mY = y;
         }
+        Log.d("DEbug TAG", "TouchMove: " + Float.toString(mY));
     }
     private void touchUp(){
         mPath.lineTo(mX, mY);
+        Log.d("DEbug TAG", "touchUp: " + Float.toString(mY));
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
         float x = event.getX();
         float y = event.getY();
+        Log.d("Action", String.valueOf(event.getAction()));
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
+                Log.d("action","down");
                 touchStart(x,y);
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
+                Log.d("action","move");
                 touchMove(x,y);
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
+                Log.d("action","up");
                 touchUp();
                 invalidate();
                 break;
         }
-        return super.onTouchEvent(event);
+        return true;
     }
 }
 

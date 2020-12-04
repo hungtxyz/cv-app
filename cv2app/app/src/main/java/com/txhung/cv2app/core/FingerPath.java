@@ -1,6 +1,6 @@
 package com.txhung.cv2app.core;
 
-import java.nio.file.Path;
+import android.graphics.Path;
 
 public class FingerPath {
     public int color;

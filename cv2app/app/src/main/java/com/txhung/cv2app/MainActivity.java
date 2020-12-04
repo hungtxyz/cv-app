@@ -2,6 +2,7 @@ package com.txhung.cv2app;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -67,6 +69,12 @@ public class MainActivity extends AppCompatActivity {
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
+////////////////////////////////////////////// TRY TO FIX SIZE OF RETURNING IMAGE
+
+//            Uri photoURI = FileProvider.getUriForFile(this,
+//                    "com.example.android.fileprovider",
+//                    photoFile);
+//            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,"a");
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         } catch (ActivityNotFoundException e) {
             // display error state to the user
@@ -93,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             else {
                 String msg = "w="+mat.cols() +" h="+ mat.rows();
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MainActivity.this, ChooseObjectActivivy.class);
+                Intent intent = new Intent(MainActivity.this, PaintActivity.class);
                 startActivity(intent);
             }
 
@@ -102,10 +110,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            Bitmap imageBitmap = (Bitmap) extras.get("data") ;
 //            imageView.setImageBitmap(imageBitmap);
             ContextImage.getInstance().setBitmap(imageBitmap);
-            Intent intent = new Intent(MainActivity.this, ChooseObjectActivivy.class);
+            Log.d("IMG WIDTH: ", Integer.toString(imageBitmap.getWidth()));
+            Intent intent = new Intent(MainActivity.this, PaintActivity.class);
             startActivity(intent);
         }
 

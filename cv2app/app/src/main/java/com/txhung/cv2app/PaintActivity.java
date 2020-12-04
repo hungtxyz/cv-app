@@ -2,9 +2,12 @@ package com.txhung.cv2app;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 
+import com.txhung.cv2app.core.ContextImage;
 import com.txhung.cv2app.core.PainView;
 
 public class PaintActivity extends AppCompatActivity {
@@ -17,6 +20,9 @@ public class PaintActivity extends AppCompatActivity {
         PainView painView = findViewById(R.id.paintView);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        painView.init(displayMetrics);
+        Bitmap bitmap = ContextImage.getInstance().getBitmap();
+        painView.init(displayMetrics, bitmap);
+
     }
+
 }
