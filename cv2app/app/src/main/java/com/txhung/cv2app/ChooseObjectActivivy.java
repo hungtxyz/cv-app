@@ -34,18 +34,18 @@ public class ChooseObjectActivivy extends AppCompatActivity {
         // Get bitmap image
         Bitmap bmImage = ContextImage.getInstance().getBitmap();
 
-        // Convert bitmap to mat
-        Bitmap bmp32 = bmImage.copy(Bitmap.Config.ARGB_8888, true);
-        Mat matImage = new Mat();
-        Utils.bitmapToMat(bmp32, matImage);
-        String msg = "w="+matImage.cols() +" h="+ matImage.rows();
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-        //
+//        // Convert bitmap to mat
+//        Bitmap bmp32 = bmImage.copy(Bitmap.Config.ARGB_8888, true);
+//        Mat matImage = new Mat();
+//        Utils.bitmapToMat(bmp32, matImage);
+//        String msg = "w="+matImage.cols() +" h="+ matImage.rows();
+//        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+//        //
+//
+//
 
-
-
-        // convert mat to bitmap
-        Utils.matToBitmap(matImage, bmImage);
+//        // convert mat to bitmap
+//        Utils.matToBitmap(matImage, bmImage);
         imageView.setImageBitmap(bmImage);
 
 

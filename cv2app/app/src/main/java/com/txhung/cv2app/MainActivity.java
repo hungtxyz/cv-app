@@ -3,6 +3,7 @@ package com.txhung.cv2app;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -27,18 +28,20 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("opencv_java4");
     }
 
-    Button openButton, acceptButton;
+    Button openButton, cameraButton;
     ImageView imageView;
     Uri imageUri;
     Mat image = null;
     Bitmap bmImage = null;
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_IMAGE_GALLERY = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //  App code
         openButton = findViewById(R.id.openButton);
-        acceptButton = findViewById(R.id.acceptButton);
+        cameraButton = findViewById(R.id.cameraButton);
         imageView = findViewById(R.id.imageView);
         openButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,40 +50,33 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         // Accept img and start Choose object activity
-        acceptButton.setOnClickListener(new View.OnClickListener() {
+        cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (bmImage==null)
-                    Toast.makeText(MainActivity.this,"Image is null", Toast.LENGTH_SHORT).show();
-                else{
-//                    showFilter2D(image);
-                    // start ChooseObjectActivity
-                    Intent intent = new Intent(MainActivity.this, ChooseObjectActivivy.class);
-                    startActivity(intent);
-                }
+                dispatchTakePictureIntent();
             }
         });
+
     }
     private void openImage(){
         Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-        startActivityForResult(gallery, 0);
-    }
-    // Never use
-    private void showFilter2D(Mat mat){
-        Mat desMat = new Mat( mat.cols(),mat.rows(),CvType.CV_8UC4);
-        Imgproc.Laplacian( mat, desMat, -1);
-        Imgproc.cvtColor(desMat, desMat,Imgproc.COLOR_BGR2GRAY);
-       // Mat temMat = new Mat( mat.cols(),desMat.rows(),CvType.CV_8UC4 );
-        Bitmap bitmap = Bitmap.createBitmap(mat.cols(),desMat.rows(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(desMat, bitmap);
-        imageView.setImageBitmap(bitmap);
+        startActivityForResult(gallery, REQUEST_IMAGE_GALLERY);
     }
 
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        try {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        } catch (ActivityNotFoundException e) {
+            // display error state to the user
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode==0 && resultCode==RESULT_OK) {
+        if (requestCode==REQUEST_IMAGE_GALLERY && resultCode==RESULT_OK) {
             assert data != null;
             imageUri = data.getData();
             imageView.setImageURI(imageUri);
@@ -97,9 +93,21 @@ public class MainActivity extends AppCompatActivity {
             else {
                 String msg = "w="+mat.cols() +" h="+ mat.rows();
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, ChooseObjectActivivy.class);
+                startActivity(intent);
             }
 
 
         }
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+//            imageView.setImageBitmap(imageBitmap);
+            ContextImage.getInstance().setBitmap(imageBitmap);
+            Intent intent = new Intent(MainActivity.this, ChooseObjectActivivy.class);
+            startActivity(intent);
+        }
+
     }
 }
