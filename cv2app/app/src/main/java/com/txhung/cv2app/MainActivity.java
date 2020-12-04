@@ -5,10 +5,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +26,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.File;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     Button openButton, cameraButton;
     ImageView imageView;
     Uri imageUri;
-    Mat image = null;
+    ContentValues values;
     Bitmap bmImage = null;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_IMAGE_GALLERY = 0;
@@ -55,7 +59,11 @@ public class MainActivity extends AppCompatActivity {
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dispatchTakePictureIntent();
+                try {
+                    dispatchTakePictureIntent();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -64,21 +72,25 @@ public class MainActivity extends AppCompatActivity {
         Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
         startActivityForResult(gallery, REQUEST_IMAGE_GALLERY);
     }
+    public String getRealPathFromURI(Uri contentUri) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
+        int column_index = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
 
+    private void dispatchTakePictureIntent() throws IOException {
 
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        try {
-////////////////////////////////////////////// TRY TO FIX SIZE OF RETURNING IMAGE
-
-//            Uri photoURI = FileProvider.getUriForFile(this,
-//                    "com.example.android.fileprovider",
-//                    photoFile);
-//            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,"a");
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        } catch (ActivityNotFoundException e) {
-            // display error state to the user
-        }
+        values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "New Picture");
+        values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
+        imageUri = getContentResolver().insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
     }
 
     @Override
@@ -101,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             else {
                 String msg = "w="+mat.cols() +" h="+ mat.rows();
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MainActivity.this, PaintActivity.class);
+                Intent intent = new Intent(MainActivity.this, DrawOnBitmapActivity.class);
                 startActivity(intent);
             }
 
@@ -109,12 +121,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data") ;
-//            imageView.setImageBitmap(imageBitmap);
-            ContextImage.getInstance().setBitmap(imageBitmap);
-            Log.d("IMG WIDTH: ", Integer.toString(imageBitmap.getWidth()));
-            Intent intent = new Intent(MainActivity.this, PaintActivity.class);
+            try {
+                 bmImage = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                 Log.d("Log Debug", Integer.toString(bmImage.getHeight()));
+                ContextImage.getInstance().setBitmap(bmImage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Log.d("IMG WIDTH: ", Integer.toString(bmImage.getWidth()));
+            Intent intent = new Intent(MainActivity.this, DrawOnBitmapActivity.class);
             startActivity(intent);
         }
 
