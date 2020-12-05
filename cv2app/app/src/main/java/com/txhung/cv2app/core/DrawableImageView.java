@@ -1,19 +1,24 @@
 package com.txhung.cv2app.core;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.appcompat.widget.AppCompatImageView;
 
 import android.view.View.*;
+import android.view.WindowManager;
 
 public class DrawableImageView extends AppCompatImageView  implements OnTouchListener
 {
@@ -23,6 +28,7 @@ public class DrawableImageView extends AppCompatImageView  implements OnTouchLis
     float upy = 0;
 
     Canvas canvas;
+    Canvas canvasMask;
     Paint paint;
     Matrix matrix;
 
@@ -47,15 +53,28 @@ public class DrawableImageView extends AppCompatImageView  implements OnTouchLis
 
     public void setNewImage(Bitmap alteredBitmap, Bitmap bmp)
     {
+        Bitmap resultBitmap = Bitmap.createBitmap(alteredBitmap);
         canvas = new Canvas(alteredBitmap);
         paint = new Paint();
         paint.setColor(Color.GREEN);
         paint.setStrokeWidth(10);
         matrix = new Matrix();
-        canvas.drawBitmap(bmp, matrix, paint);
+//        canvas.drawBitmap(bmp, matrix, paint);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) getContext()).getWindowManager()
+                .getDefaultDisplay()
+                .getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        float r = bmp.getWidth()/width;
+        Bitmap backgroundBitmap = Bitmap.createScaledBitmap(bmp,width,Math.round(bmp.getHeight()/r),true);
+
+        Drawable d = new BitmapDrawable(getResources(), backgroundBitmap);
+        setBackgroundDrawable(d);
 
         setImageBitmap(alteredBitmap);
     }
+
 
     @Override
     public boolean onTouch(View v, MotionEvent event)

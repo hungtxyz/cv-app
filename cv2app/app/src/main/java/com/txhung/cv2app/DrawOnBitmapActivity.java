@@ -46,7 +46,7 @@ public class DrawOnBitmapActivity extends Activity
 
         alteredBitmap = Bitmap.createBitmap(bmp.getWidth(),
                 bmp.getHeight(), bmp.getConfig());
-
+        Log.d("debug#####################", bmp.getConfig().toString());
         choosenImageView.setNewImage(alteredBitmap, bmp);
 
 
@@ -65,7 +65,7 @@ public class DrawOnBitmapActivity extends Activity
                         OutputStream imageFileOS = getContentResolver()
                                 .openOutputStream(imageFileUri);
                         alteredBitmap
-                                .compress(Bitmap.CompressFormat.JPEG, 90, imageFileOS);
+                                .compress(Bitmap.CompressFormat.JPEG, 100, imageFileOS);
                         Toast t = Toast
                                 .makeText(DrawOnBitmapActivity.this, "Saved!", Toast.LENGTH_SHORT);
                         t.show();
@@ -78,27 +78,5 @@ public class DrawOnBitmapActivity extends Activity
         });
 
     }
-
-
-    protected void onActivityResult(int requestCode, int resultCode,
-                                    Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        if (resultCode == RESULT_OK) {
-            Uri imageFileUri = intent.getData();
-            try {
-                Bitmap bmp = ContextImage.getInstance().getBitmap();
-
-                alteredBitmap = Bitmap.createBitmap(bmp.getWidth(),
-                        bmp.getHeight(), bmp.getConfig());
-
-                choosenImageView.setNewImage(alteredBitmap, bmp);
-            }
-            catch (Exception e) {
-                Log.v("ERROR", e.toString());
-            }
-        }
-    }
-
 
 }

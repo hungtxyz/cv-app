@@ -8,7 +8,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="ACCEPT" android:id="@+id/SavePictureButton"/>
-    <com.txhung.cv2app.core.DrawableImageView android:layout_width="wrap_content"
+    <com.txhung.cv2app.core.DrawableImageView android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/ChoosenImageView">
     </com.txhung.cv2app.core.DrawableImageView>
