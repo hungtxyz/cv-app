@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.txhung.cv2app.core.ContextImage;
+import com.txhung.cv2app.core.ServerConnector;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -56,6 +57,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         // Accept img and start Choose object activity
+        Button connectBtn = findViewById(R.id.testServerBtn);
+        connectBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ServerConnector connector = new ServerConnector();
+                connector.postRequest("data from user", MainActivity.this);
+            }
+        });
+
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
