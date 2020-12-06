@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, flash, send_file
 from werkzeug.utils import secure_filename
 import cv2
-from new_seam import object_removal
+from seam_carving import object_removal
 import numpy as np
 app = Flask(__name__)
 
