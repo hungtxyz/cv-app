@@ -20,8 +20,12 @@ import android.widget.Toast;
 
 import com.txhung.cv2app.core.ContextImage;
 import com.txhung.cv2app.core.DrawableImageView;
+import com.txhung.cv2app.core.ServerConnector;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.OutputStream;
+import java.util.Date;
 
 public class DrawOnBitmapActivity extends Activity
 {
@@ -46,7 +50,6 @@ public class DrawOnBitmapActivity extends Activity
 
         alteredBitmap = Bitmap.createBitmap(bmp.getWidth(),
                 bmp.getHeight(), bmp.getConfig());
-        Log.d("debug#####################", bmp.getConfig().toString());
         choosenImageView.setNewImage(alteredBitmap, bmp);
 
 
@@ -56,19 +59,18 @@ public class DrawOnBitmapActivity extends Activity
             public void onClick(View v) {
                 if (alteredBitmap != null)
                 {
-                    ContentValues contentValues = new ContentValues(3);
-                    contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, "Draw On Me");
-
-                    Uri imageFileUri = getContentResolver().insert(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
                     try {
-                        OutputStream imageFileOS = getContentResolver()
-                                .openOutputStream(imageFileUri);
-                        alteredBitmap
-                                .compress(Bitmap.CompressFormat.JPEG, 100, imageFileOS);
-                        Toast t = Toast
-                                .makeText(DrawOnBitmapActivity.this, "Saved!", Toast.LENGTH_SHORT);
-                        t.show();
+
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        alteredBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                        byte[] maskByteArray = stream.toByteArray();
+
+                        ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream1);
+                        byte[] originByteArray = stream1.toByteArray();
+
+                        ServerConnector connector = ServerConnector.getInstance();
+                        connector.sendImg(maskByteArray,originByteArray, DrawOnBitmapActivity.this);
 
                     } catch (Exception e) {
                         Log.v("EXCEPTION", e.getMessage());

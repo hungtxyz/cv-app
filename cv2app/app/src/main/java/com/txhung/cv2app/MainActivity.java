@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //  App code
+
         openButton = findViewById(R.id.openButton);
         cameraButton = findViewById(R.id.cameraButton);
         imageView = findViewById(R.id.imageView);
@@ -56,12 +56,12 @@ public class MainActivity extends AppCompatActivity {
                 openImage();
             }
         });
-        // Accept img and start Choose object activity
+
         Button connectBtn = findViewById(R.id.testServerBtn);
         connectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ServerConnector connector = new ServerConnector();
+                ServerConnector connector = ServerConnector.getInstance();
                 connector.postRequest("data from user", MainActivity.this);
             }
         });
@@ -82,14 +82,7 @@ public class MainActivity extends AppCompatActivity {
         Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
         startActivityForResult(gallery, REQUEST_IMAGE_GALLERY);
     }
-    public String getRealPathFromURI(Uri contentUri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
-        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
-        int column_index = cursor
-                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
-    }
+
 
     private void dispatchTakePictureIntent() throws IOException {
 
@@ -117,8 +110,14 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             assert bmImage != null;
+
+//            float ratio = (float) 0.6;
+//            float dstHeight = (float)bmImage.getHeight()*ratio;
+//            float dstWidth = (float)bmImage.getWidth()*ratio;
+//            Log.d("aaaaaaaaaaaaaaaaa", Float.toString(ratio));
+//            ContextImage.getInstance().setBitmap(Bitmap.createScaledBitmap(bmImage,(int)dstWidth,(int)dstHeight,true));
             ContextImage.getInstance().setBitmap(bmImage);
-            Mat mat = new Mat(bmImage.getWidth(), bmImage.getHeight(), CvType.CV_8UC4);
+            Mat mat = new Mat(ContextImage.getInstance().getBitmap().getWidth(), ContextImage.getInstance().getBitmap().getHeight(), CvType.CV_8UC4);
             if (mat.rows()==0) Toast.makeText(this, "failed", Toast.LENGTH_SHORT).show();
             else {
                 String msg = "w="+mat.cols() +" h="+ mat.rows();

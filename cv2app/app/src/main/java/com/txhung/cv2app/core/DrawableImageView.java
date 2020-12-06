@@ -60,16 +60,16 @@ public class DrawableImageView extends AppCompatImageView  implements OnTouchLis
         paint.setStrokeWidth(10);
         matrix = new Matrix();
 //        canvas.drawBitmap(bmp, matrix, paint);
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) getContext()).getWindowManager()
-                .getDefaultDisplay()
-                .getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
-        float r = bmp.getWidth()/width;
-        Bitmap backgroundBitmap = Bitmap.createScaledBitmap(bmp,width,Math.round(bmp.getHeight()/r),true);
+//        DisplayMetrics displayMetrics = new DisplayMetrics();
+//        ((Activity) getContext()).getWindowManager()
+//                .getDefaultDisplay()
+//                .getMetrics(displayMetrics);
+//        int height = displayMetrics.heightPixels;
+//        int width = displayMetrics.widthPixels;
+//        float r = bmp.getWidth()/width;
+//        Bitmap backgroundBitmap = Bitmap.createScaledBitmap(bmp,width,Math.round(bmp.getHeight()/r),true);
 
-        Drawable d = new BitmapDrawable(getResources(), backgroundBitmap);
+        Drawable d = new BitmapDrawable(getResources(), bmp);
         setBackgroundDrawable(d);
 
         setImageBitmap(alteredBitmap);
